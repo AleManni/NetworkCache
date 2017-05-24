@@ -10,8 +10,9 @@ import Foundation
 
 enum Errors: Error {
     case invalidRequest
-    case dataError
     case noData
+    case dataError
+    case cacheError
     case networkError(Error)
 }
 
@@ -25,6 +26,8 @@ extension Errors: CustomStringConvertible {
             return "No data returned form server"
         case .dataError:
             return "Response from server cannot be converted in image"
+        case .cacheError:
+            return "Cahce error: image not found in cache"
         case .networkError(let error):
             return (error.localizedDescription)
         }

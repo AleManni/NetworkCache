@@ -9,11 +9,11 @@
 import Foundation
 import UIKit
 
-protocol MySuperCache {
-    func get(imageAtURLString imageURLString: String, completionBlock: (UIImage?) -> Void)
+protocol Cache {
+    func get(_ imageURLString: String, completionBlock: (CachableImage?) -> Void)
 }
 
-class ImageCache: MySuperCache {
+class ImageCache: Cache {
     private let cache = NSCache<NSString, CachableImage>()
     private var accessTable = AccessTable()
 
@@ -22,10 +22,10 @@ class ImageCache: MySuperCache {
         cache.totalCostLimit = 10 // TODO: Set a limit that makes sense
     }
 
-    func get(imageAtURLString imageURLString: String, completionBlock: (UIImage?) -> Void) {
+    func get(_ imageURLString: String, completionBlock: (CachableImage?) -> Void) {
         if let cachedImage = cache.object(forKey: imageURLString as NSString) {
             accessTable.increaseCount(for: imageURLString)
-            completionBlock(cachedImage.image)
+            completionBlock(cachedImage)
         } else {
             completionBlock(nil)
         }
@@ -44,8 +44,8 @@ class ImageCache: MySuperCache {
         }
     }
 
-    func write(image: CachableImage, urlString: String) {
-        cache.setObject(image, forKey: urlString as NSString)
-        accessTable.increaseCount(for: urlString)
+    func write(image: CachableImage) {
+        cache.setObject(image, forKey: image.url as NSString)
+        accessTable.increaseCount(for: image.url)
     }
 }

@@ -11,7 +11,6 @@ import UIKit
 
 enum ImageResponse {
     case image(UIImage)
-    case inCache
     case failure(Errors)
 }
 

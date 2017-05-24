@@ -19,51 +19,78 @@ class NetworkService {
         return session
     }()
 
-    private static var imageCache: NSCache = {
-        return NSCache<NSString, CachableImage>()
-        // Initialise the chace properly once you have created its class
+    private static var imageCache: ImageCache = {
+        return ImageCache(maxItems: 20)
     }()
 
     func fetchImage(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
+        NetworkService.imageCache.get(urlString, completionBlock: { result in
+            if let cachedImage = result {
+                fetchFromCache(cached: cachedImage, completion: { result in
+                    completion(result)
+                })
+            } else {
+                fetch(urlString: urlString, completion: { result in
+                    completion(result)
+                })
+            }
+        })
+    }
 
-        guard let imageRequest = imageRequest(urlString) else {
+    func fetchFromCache(cached: CachableImage, completion: @escaping (_ result: ImageResponse) -> ()) {
+        guard let imageRequest = imageRequest(cached) else {
             completion(.failure(.invalidRequest))
             return
         }
-
         let task = NetworkService.session.dataTask(with: imageRequest, completionHandler: {
             (data, response, error) in
             if let error = error as NSError? {
                 completion(.failure(.networkError(error)))
                 return
             }
-
-            if let httpResponse = response as? HTTPURLResponse, let urlString = imageRequest.url?.absoluteString, httpResponse.statusCode == 304 {
-                // chache retrieves image with urlString key and returns it
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 304 {
+                completion(.image(cached.image))
             } else {
-                guard let responseData = data else {
-                    completion(.failure(.noData))
-                    return
-                }
-                guard let image = UIImage(data: responseData) else {
-                    completion(.failure(.dataError))
-                    return
-                }
-                if let cachableImage = CachableImage(url: imageRequest.url, response: response as? HTTPURLResponse, image: image) {
-                    // static cache store the cachableImage - dispatch in background queue
-                }
-                completion(.image(image))
+                completion(.failure(.cacheError))
             }
         })
         task.resume()
     }
 
-    private func imageRequest(_ urlString: String) -> URLRequest? {
-        var requestParameters: [String: String]?
-        if let cachedImage = NetworkService.imageCache.object(forKey: urlString as NSString) {
-            requestParameters = ImageRequestParameters.parameters(from: cachedImage)
+    func fetch(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
+        guard let url = URL(string: urlString) else {
+            completion(.failure(.invalidRequest))
+            return
         }
-        guard let url = URL(string: urlString), let imageRequest = ImageRequest(baseURL: url, endPoint: nil, parameters: requestParameters).urlRequest else {
+        guard let imageRequest = ImageRequest(baseURL: url, endPoint: nil, parameters: nil).urlRequest else {
+            completion(.failure(.invalidRequest))
+            return
+        }
+        let task = NetworkService.session.dataTask(with: imageRequest, completionHandler: {
+            (data, response, error) in
+            if let error = error as NSError? {
+                completion(.failure(.networkError(error)))
+                return
+            }
+            guard let responseData = data else {
+                completion(.failure(.noData))
+                return
+            }
+            guard let image = UIImage(data: responseData) else {
+                completion(.failure(.dataError))
+                return
+            }
+            if let cachableImage = CachableImage(url: imageRequest.url, response: response as? HTTPURLResponse, image: image) {
+                NetworkService.imageCache.write(image: cachableImage)
+            }
+            completion(.image(image))
+        })
+        task.resume()
+    }
+
+    private func imageRequest(_ cachedImage: CachableImage) -> URLRequest? {
+        let requestParameters = ImageRequestParameters.parameters(from: cachedImage)
+        guard let url = URL(string: cachedImage.url), let imageRequest = ImageRequest(baseURL: url, endPoint: nil, parameters: requestParameters).urlRequest else {
             return nil
         }
         return imageRequest
