@@ -22,8 +22,9 @@ class CachableImage {
         self.image = image
     }
 
-    convenience init?(url: URL?, response: HTTPURLResponse?, image: UIImage) {
-        if let urlString = url?.absoluteString, let httpResponse = response,
+    convenience init?(response: HTTPURLResponse?, image: UIImage) {
+        if let httpResponse = response,
+            let urlString = response?.url?.absoluteString,
             let lastModified = httpResponse.allHeaderFields[ImageResponseParameters.lastModified.rawValue] as? String,
             let eTag = httpResponse.allHeaderFields[ImageResponseParameters.eTag.rawValue] as? String {
             self.init(urlString: urlString,
@@ -41,7 +42,7 @@ extension CachableImage: Equatable {
         return lhs.url == rhs.url
             && lhs.lastModified == rhs.lastModified
             && lhs.eTag == rhs.eTag
-            && lhs.image == rhs.image
+            && UIImagePNGRepresentation(lhs.image) == UIImagePNGRepresentation(rhs.image)
     }
 }
 

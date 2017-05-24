@@ -80,7 +80,7 @@ class NetworkService {
                 completion(.failure(.dataError))
                 return
             }
-            if let cachableImage = CachableImage(url: imageRequest.url, response: response as? HTTPURLResponse, image: image) {
+            if let cachableImage = CachableImage(response: response as? HTTPURLResponse, image: image) {
                 NetworkService.imageCache.write(image: cachableImage)
             }
             completion(.image(image))

@@ -20,6 +20,7 @@ struct AccessTable {
     mutating func increaseCount(for imageKey: String) {
         if var count = table[imageKey] {
             count += 1
+            table[imageKey] = count
         } else {
             table[imageKey] = 0
         }
@@ -27,5 +28,9 @@ struct AccessTable {
 
     mutating func deleteEntry(for imageKey: String) {
         table.removeValue(forKey: imageKey)
+    }
+
+    mutating func clearAll() {
+        table.removeAll()
     }
 }

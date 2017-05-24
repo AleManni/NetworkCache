@@ -47,6 +47,7 @@ struct ImageRequest: NetworkRequest {
         return request
     }
 
+    // At this provisionary stage I am not using endPoints since there is no real API to be used 
     init(baseURL: URL, endPoint: String?, parameters: [String: String]?) {
         self.baseURL = baseURL
         self.endPoint = endPoint
