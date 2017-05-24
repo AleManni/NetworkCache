@@ -22,7 +22,7 @@ class ImageCache: Cache {
 
     init(maxItems: Int) {
         cache.countLimit = maxItems
-        cache.totalCostLimit = 0 // TODO: Set a limit that makes sense - this is actually the only feature why we use a cachce rather than a normal dictionary 
+        cache.totalCostLimit = 0 // TODO: Set a limit that makes sense
     }
 
     func get(_ imageKey: String, completionBlock: (CachableImage?) -> Void) {
