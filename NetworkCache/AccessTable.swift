@@ -18,9 +18,8 @@ struct AccessTable {
     }
 
     mutating func increaseCount(for imageKey: String) {
-        if var count = table[imageKey] {
-            count += 1
-            table[imageKey] = count
+        if let count = table[imageKey] {
+            table[imageKey] = count + 1
         } else {
             table[imageKey] = 0
         }

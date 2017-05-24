@@ -37,27 +37,26 @@ class NetworkService {
         })
     }
 
-    func fetchFromCache(cached: CachableImage, completion: @escaping (_ result: ImageResponse) -> ()) {
+    private func fetchFromCache(cached: CachableImage, completion: @escaping (_ result: ImageResponse) -> ()) {
         guard let imageRequest = imageRequest(cached) else {
             completion(.failure(.invalidRequest))
             return
         }
         let task = NetworkService.session.dataTask(with: imageRequest, completionHandler: {
             (data, response, error) in
-            if let error = error as NSError? {
-                completion(.failure(.networkError(error)))
-                return
-            }
+
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 304 {
                 completion(.image(cached.image))
             } else {
-                completion(.failure(.cacheError))
+                self.imageFromResponseData(data: data, response: response as! HTTPURLResponse, error: error, completion: { result in
+                    completion(result)
+                })
             }
         })
         task.resume()
     }
 
-    func fetch(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
+    private func fetch(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
         guard let url = URL(string: urlString) else {
             completion(.failure(.invalidRequest))
             return
@@ -68,22 +67,10 @@ class NetworkService {
         }
         let task = NetworkService.session.dataTask(with: imageRequest, completionHandler: {
             (data, response, error) in
-            if let error = error as NSError? {
-                completion(.failure(.networkError(error)))
-                return
-            }
-            guard let responseData = data else {
-                completion(.failure(.noData))
-                return
-            }
-            guard let image = UIImage(data: responseData) else {
-                completion(.failure(.dataError))
-                return
-            }
-            if let cachableImage = CachableImage(response: response as? HTTPURLResponse, image: image) {
-                NetworkService.imageCache.write(image: cachableImage)
-            }
-            completion(.image(image))
+
+            self.imageFromResponseData(data: data, response: response as! HTTPURLResponse, error: error, completion: { result in
+                completion(result)
+            })
         })
         task.resume()
     }
@@ -94,6 +81,27 @@ class NetworkService {
             return nil
         }
         return imageRequest
+    }
+
+    private func imageFromResponseData(data: Data?, response: HTTPURLResponse, error: Error?, completion: @escaping (_ result: ImageResponse) -> ()) {
+        if let error = error as NSError? {
+            completion(.failure(.networkError(error)))
+            return
+        }
+        guard let responseData = data else {
+            completion(.failure(.noData))
+            return
+        }
+        guard let image = UIImage(data: responseData) else {
+            completion(.failure(.dataError))
+            return
+        }
+        if let cachableImage = CachableImage(response: response, image: image) {
+            DispatchQueue.global(qos: .utility).async {
+            NetworkService.imageCache.write(image: cachableImage)
+            }
+        }
+        completion(.image(image))
     }
 }
 
