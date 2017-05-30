@@ -1,5 +1,5 @@
 //
-//  NetworkCacheTests.swift
+//  CacheTests.swift
 //  NetworkCacheTests
 //
 //  Created by Alessandro Manni on 24/05/2017.
@@ -9,7 +9,7 @@
 import XCTest
 @testable import NetworkCache
 
-class NetworkCacheTests: XCTestCase {
+class CacheTests: XCTestCase {
     var cache = ImageCache(maxItems: 20)
     let mockGenerator = MocksGenerator()
 
