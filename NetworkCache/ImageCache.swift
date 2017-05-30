@@ -16,13 +16,13 @@ protocol Cache {
 class ImageCache: Cache {
     private let cache = NSCache<NSString, CachableImage>()
     private var accessTable = AccessTable()
+    var maxItems: Int
     var count: Int {
         return self.accessTable.count
     }
 
     init(maxItems: Int) {
-        cache.countLimit = maxItems
-        cache.totalCostLimit = 0 // TODO: Set a limit that makes sense
+        self.maxItems = maxItems
     }
 
     func get(_ imageKey: String, completionBlock: (CachableImage?) -> Void) {
@@ -53,7 +53,7 @@ class ImageCache: Cache {
     }
 
     private func prepareForUse() {
-        while accessTable.count >= cache.countLimit {
+        while accessTable.count >= maxItems {
             let deleatable = accessTable.leastAccessed
             delete(objectAtKey: deleatable)
             accessTable.deleteEntry(for: deleatable)
