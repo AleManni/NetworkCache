@@ -74,6 +74,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1DB110DD1EDD6E5500241C22 /* ImageCache */ = {
+			isa = PBXGroup;
+			children = (
+				1DFF04311ED5790000B81075 /* ImageCache.swift */,
+				1DFF04331ED5791B00B81075 /* AccessTable.swift */,
+			);
+			name = ImageCache;
+			sourceTree = "<group>";
+		};
 		1DFF03F61ED5776000B81075 = {
 			isa = PBXGroup;
 			children = (
@@ -133,8 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				1DFF042F1ED578D000B81075 /* NetworkService.swift */,
-				1DFF04311ED5790000B81075 /* ImageCache.swift */,
-				1DFF04331ED5791B00B81075 /* AccessTable.swift */,
+				1DB110DD1EDD6E5500241C22 /* ImageCache */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -472,6 +480,7 @@
 				1DFF041E1ED5776000B81075 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1DFF041F1ED5776000B81075 /* Build configuration list for PBXNativeTarget "NetworkCacheTests" */ = {
 			isa = XCConfigurationList;
@@ -480,6 +489,7 @@
 				1DFF04211ED5776000B81075 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
