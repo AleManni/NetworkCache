@@ -20,7 +20,7 @@ class NetworkService {
     }()
 
     private static var imageCache: ImageCache = {
-        return ImageCache(maxItems: 20)
+        return ImageCache(maxItems: 200)
     }()
 
     func fetchImage(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
@@ -57,8 +57,7 @@ class NetworkService {
     }
 
     private func fetch(from urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
-
-        guard let imageRequest = ImageRequest(urlString: urlString, parameters: nil)?.urlRequest else {
+        guard let imageRequest = ImageRequest(urlString: urlString)?.urlRequest else {
             completion(.failure(.invalidRequest))
             return
         }

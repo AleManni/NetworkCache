@@ -54,7 +54,7 @@ struct ImageRequest: NetworkRequest {
         self.parameters = parameters
     }
 
-    init?(urlString: String, parameters: [String: String]?) {
+    init?(urlString: String, parameters: [String: String]? = nil) {
         guard let components = URLComponents(string: urlString),
             let host = components.host,
             let base = URL(string: host)
