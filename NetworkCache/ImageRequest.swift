@@ -21,12 +21,13 @@ enum ImageRequestParameters: String {
 }
 
 struct ImageRequest: NetworkRequest {
-    var method: Method = .GET
-    var baseURL: URL
-    var endPoint: String?
-    var parameters: [String: String]?
+    let method: Method = .GET
+    let baseURL: URL
+    let endPoint: String
+    let parameters: [String: String]?
+
     var urlRequest: URLRequest? {
-        let URL = baseURL.appendingPathComponent(endPoint ?? "")
+        let URL = baseURL.appendingPathComponent(endPoint)
         guard var components = URLComponents(url: URL, resolvingAgainstBaseURL: false) else {
             return nil
         }
@@ -47,13 +48,35 @@ struct ImageRequest: NetworkRequest {
         return request
     }
 
-    // At this provisionary stage I am not using endPoints since there is no real API to be used 
-    init(baseURL: URL, endPoint: String?, parameters: [String: String]?) {
+    static func urlRequest(from cachedImage: CachableImage) -> URLRequest? {
+        let requestParameters = ImageRequestParameters.parameters(from: cachedImage)
+        if let request = self.init(urlString: cachedImage.url, parameters: requestParameters)?.urlRequest {
+            return request
+        } else {
+            return nil
+        }
+    }
+
+    init(baseURL: URL, endPoint: String, parameters: [String: String]?) {
         self.baseURL = baseURL
         self.endPoint = endPoint
         self.parameters = parameters
     }
-    
+
+    init?(urlString: String, parameters: [String: String]?) {
+        guard let components = URLComponents(string: urlString),
+            let host = components.host,
+            let base = URL(string: host)
+            else {
+                return nil
+        }
+        self.init(baseURL: base, endPoint: components.path, parameters: parameters)
+    }
+
+    init?(cachedImage: CachableImage) {
+        let requestParameters = ImageRequestParameters.parameters(from: cachedImage)
+        self.init(urlString: cachedImage.url, parameters: requestParameters)
+    }
 }
 
 

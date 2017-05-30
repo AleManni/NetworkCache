@@ -26,19 +26,19 @@ class NetworkService {
     func fetchImage(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
         NetworkService.imageCache.get(urlString, completionBlock: { result in
             if let cachedImage = result {
-                fetchFromCache(cached: cachedImage, completion: { result in
+                fetch(from: cachedImage, completion: { result in
                     completion(result)
                 })
             } else {
-                fetch(urlString: urlString, completion: { result in
+                fetch(from: urlString, completion: { result in
                     completion(result)
                 })
             }
         })
     }
 
-    private func fetchFromCache(cached: CachableImage, completion: @escaping (_ result: ImageResponse) -> ()) {
-        guard let imageRequest = imageRequest(cached) else {
+    private func fetch(from cached: CachableImage, completion: @escaping (_ result: ImageResponse) -> ()) {
+        guard let imageRequest = ImageRequest(cachedImage: cached)?.urlRequest else {
             completion(.failure(.invalidRequest))
             return
         }
@@ -56,12 +56,9 @@ class NetworkService {
         task.resume()
     }
 
-    private func fetch(urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
-        guard let url = URL(string: urlString) else {
-            completion(.failure(.invalidRequest))
-            return
-        }
-        guard let imageRequest = ImageRequest(baseURL: url, endPoint: nil, parameters: nil).urlRequest else {
+    private func fetch(from urlString: String, completion: @escaping (_ result: ImageResponse) -> ()) {
+
+        guard let imageRequest = ImageRequest(urlString: urlString, parameters: nil)?.urlRequest else {
             completion(.failure(.invalidRequest))
             return
         }
@@ -73,14 +70,6 @@ class NetworkService {
             })
         })
         task.resume()
-    }
-
-    private func imageRequest(_ cachedImage: CachableImage) -> URLRequest? {
-        let requestParameters = ImageRequestParameters.parameters(from: cachedImage)
-        guard let url = URL(string: cachedImage.url), let imageRequest = ImageRequest(baseURL: url, endPoint: nil, parameters: requestParameters).urlRequest else {
-            return nil
-        }
-        return imageRequest
     }
 
     private func imageFromResponseData(data: Data?, response: HTTPURLResponse, error: Error?, completion: @escaping (_ result: ImageResponse) -> ()) {

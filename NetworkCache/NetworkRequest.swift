@@ -16,7 +16,7 @@ enum Method: String {
 protocol NetworkRequest {
     var method: Method { get }
     var baseURL: URL { get }
-    var endPoint: String? { get }
+    var endPoint: String { get }
     var parameters: [String: String]? { get }
     var urlRequest: URLRequest? { get }
 }
