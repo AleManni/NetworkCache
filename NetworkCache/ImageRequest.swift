@@ -48,15 +48,6 @@ struct ImageRequest: NetworkRequest {
         return request
     }
 
-    static func urlRequest(from cachedImage: CachableImage) -> URLRequest? {
-        let requestParameters = ImageRequestParameters.parameters(from: cachedImage)
-        if let request = self.init(urlString: cachedImage.url, parameters: requestParameters)?.urlRequest {
-            return request
-        } else {
-            return nil
-        }
-    }
-
     init(baseURL: URL, endPoint: String, parameters: [String: String]?) {
         self.baseURL = baseURL
         self.endPoint = endPoint
