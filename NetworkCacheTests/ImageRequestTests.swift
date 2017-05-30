@@ -32,18 +32,20 @@ class ImageRequestTests: XCTestCase {
     }
 
     func testImageRequest_fromCachedImage() {
+        // GIVEN
         let headerFields = ["last-Modified": "Wed, 24 May 2017 00:00:00 GMT", "eTag": "f7778b98fd4dfcd14fe6eaa67b73a5d0"]
         guard let url = URL(string: urlString) else {
             XCTFail()
             return
         }
         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: headerFields)
+        // WHEN
         guard let cachableImage = CachableImage(response: response, image: UIImage()),
         let request = ImageRequest(cachedImage: cachableImage) else {
             XCTFail("Failed to initialise image request with url string")
         return
     }
-
+        //THEN
         XCTAssertEqual(request.method, .GET)
         XCTAssertEqual(request.baseURL, URL(string: "https://test.com"))
         XCTAssertEqual(request.endPoint, "/image01.png")
